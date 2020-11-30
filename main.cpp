@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -8,14 +10,44 @@ struct place {
     string name;
     double plat;
     double plng;
-    double linkDist1;
-    double linkDist2;
-    place* link1;
-    place* link2;
+    double linkDist1 = 0;
+    double linkDist2 = 0;
+    place* link1 = nullptr;
+    place* link2 = nullptr;
     
-    void printString()
+    string toString(bool recursive = true)
     {
-        cout << name << ": " << pcode << " (" << plat << ", " << plng << ")" << endl; 
+        stringstream ss;
+        ss << name << ": " << pcode << " (" << plat << ", " << plng << ")";
+        
+        if (link1 != nullptr && recursive)
+        {
+             ss << "\n\tlink: " << link1->toString(false)
+                << "\n\t\tdistance: " << linkDist1;
+        }
+        
+        if (link2 != nullptr && recursive)
+        {
+             ss << "\n\tlink: " << link2->toString(false)
+                << "\n\t\tdistance: " << linkDist2;
+        }
+        
+        return ss.str();
+    }
+    
+    void CalculateDistances()
+    {
+        if (link1 != nullptr)
+        {
+            linkDist1 = 60 * sqrt(pow(plng - link1->plng, 2) 
+                                + pow(plat - link1->plat, 2));
+        }
+        
+        if (link2 != nullptr)
+        {
+            linkDist2 = 60 * sqrt(pow(plng - link2->plng, 2) 
+                                + pow(plat - link2->plat, 2));
+        }
     }
 };
 
@@ -59,7 +91,26 @@ int main()
         getline(file, dummy);
         getline(file, dummy);
         
-        destinations[i].printString();
+        cout << destinations[i].toString() << endl;
+    }
+    
+    file.seekg(0, file.beg);
+    for(int i = 0; i < numPlaces; i++)
+    {
+        getline(file, dummy);
+        getline(file, dummy);
+        getline(file, dummy);
+        getline(file, dummy);
+        
+        getline(file, dummy);
+        destinations[i].link1 = GetPlace(stoi(dummy), destinations, numPlaces);
+        getline(file, dummy);
+        destinations[i].link2 = GetPlace(stoi(dummy), destinations, numPlaces);
+        
+        destinations[i].CalculateDistances();
+        
+        cout << destinations[i].toString() << endl;
+        
     }
 
     return 0;
