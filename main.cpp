@@ -49,6 +49,20 @@ struct place {
                                 + pow(plat - link2->plat, 2));
         }
     }
+    
+    void RemoveLink(int n)
+    {
+        if (n == 1)
+        {
+            link1 = nullptr;
+            linkDist1 = 0.0;
+        }
+        else if (n == 2)
+        {
+            link2 = nullptr;
+            linkDist2 = 0.0;
+        }
+    }
 };
 
 place* GetPlace(int id, place* placeList, int listSize)
