@@ -31,7 +31,7 @@ place* GetPlace(int id, place* placeList, int listSize)
 
 int main()
 {
-    int numPlaces;
+    int numPlaces = 0;
     ifstream file("destinations.txt");
     
     string dummy;
@@ -45,7 +45,7 @@ int main()
     place destinations[numPlaces];
     
     file.seekg(0, file.beg);
-    for(int i = 0; i < numPlaces-1; i++)
+    for(int i = 0; i < numPlaces; i++)
     {
         getline(file, dummy);
         destinations[i].pcode = stoi(dummy);
