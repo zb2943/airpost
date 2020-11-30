@@ -12,6 +12,11 @@ struct place {
     double linkDist2;
     place* link1;
     place* link2;
+    
+    void printString()
+    {
+        cout << name << ": " << pcode << " (" << plat << ", " << plng << ")" << endl; 
+    }
 };
 
 place* GetPlace(int id, place* placeList, int listSize)
@@ -39,7 +44,8 @@ int main()
     
     place destinations[numPlaces];
     
-    for(int i = 0; i < numPlaces; i++)
+    file.seekg(0, file.beg);
+    for(int i = 0; i < numPlaces-1; i++)
     {
         getline(file, dummy);
         destinations[i].pcode = stoi(dummy);
@@ -49,9 +55,12 @@ int main()
         destinations[i].plat = stod(dummy);
         getline(file, dummy);
         destinations[i].plng = stod(dummy);
+        
         getline(file, dummy);
-        destinations[i].plat = stod(dummy);
+        getline(file, dummy);
+        
+        destinations[i].printString();
     }
-    
+
     return 0;
 }
