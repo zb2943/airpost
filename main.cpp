@@ -14,6 +14,16 @@ struct place {
     place* link2;
 };
 
+place* GetPlace(int id, place* placeList, int listSize)
+{
+    for(int i = 0; i < listSize; i++)
+    {
+        if (placeList[i].pcode == id) return &placeList[i];
+    }
+    
+    return nullptr;
+}
+
 int main()
 {
     int numPlaces;
