@@ -85,7 +85,6 @@ place* GetPlace(int id, place* placeList, int listSize)
     cout << id << endl;
     for(int i = 0; i < listSize; i++)
     {
-        cout << placeList[i].pcode << ',';
         if (placeList[i].pcode == id) return &placeList[i];
     }
 
@@ -128,7 +127,7 @@ int main()
         switch(input)
         {
             case 1:
-                while(placeTarget == nullptr)
+                while(true)
                 {
                     cout << "input a place id: "; cin >> input;
                     placeTarget = GetPlace(input, destinations, numPlaces);
@@ -177,7 +176,6 @@ void ParsePlaces(string filename, place* destinations, int& numPlaces)
         getline(file, dummy);
 
         cout << destinations[i].toString() << endl;
-        cout << "\t" << destinations[i].pcode << endl;
     }
 
     file.seekg(0, file.beg);
@@ -197,18 +195,6 @@ void ParsePlaces(string filename, place* destinations, int& numPlaces)
 
         cout << destinations[i].toString() << endl;
     }
-
-
-    for(int i = 0; i < 3; i++)
-    {
-        cout << destinations[i].pcode << endl;
-    }
-
+    
     file.close();
-
-
-    for(int i = 0; i < 3; i++)
-    {
-        cout << destinations[i].pcode << endl;
-    }
 }
