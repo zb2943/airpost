@@ -170,9 +170,9 @@ class AirpostManager
 
             cout << placeTarget->toString() << endl;
 
-            if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
+            if (placeTarget->link1 == nullptr || placeTarget->link2 == nullptr)
             {
-                cout << "\tcurrent place has no links! aborting.\n";
+                cout << "\tA destination cannot have less than one link at a time. aborting\n";
                 return;
             }
 
@@ -253,7 +253,15 @@ class AirpostManager
 
         void UITraceRoute()
         {
-            placeTarget = nullptr;
+            while(true)
+            {
+                cout << "input a place id: "; cin >> input;
+                if (input == -1) return;
+
+                placeTarget = GetPlace(input, destinations, numPlaces);
+                if (placeTarget != nullptr) break;
+                cout << "\tbad input\n";
+            }
             return;
         }
 
