@@ -122,7 +122,9 @@ int main()
     {
         // 1 = remove, 2 = add, 3 = find route
         // todo: modularize, make it look nice
-
+        
+        cout << "input 1-3, or 4 to exit: (menu wip) : ";
+        
         cin >> input;
         switch(input)
         {
@@ -136,10 +138,28 @@ int main()
                 }
 
                 cout << placeTarget->toString() << endl;
-
-                while(input <= 0 || input >= 3)
+                
+                if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
+                {
+                    cout << "current place has no links! aborting.\n";
+                    // need a return here
+                }
+                
+                while(true)
                 {
                     cout << "input a link id: "; cin >> input;
+                    if (input == 1 && placeTarget->link1 != nullptr)
+                    {
+                        placeTarget->RemoveLink(1);
+                        cout << "removed " << placeTarget->name << "\'s first link.\n";
+                        break;
+                    }
+                    else if (input == 2 && placeTarget->link2 != nullptr)
+                    {
+                        placeTarget->RemoveLink(2);
+                        cout << "removed " << placeTarget->name << "\'s second link.\n";
+                        break;
+                    }
                 }
                 break;
 
