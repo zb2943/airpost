@@ -22,13 +22,13 @@ struct place {
 
         if (link1 != nullptr && recursive)
         {
-             ss << "\n\tlink: " << link1->toString(false)
+             ss << "\n\tlink 1: " << link1->toString(false)
                 << "\n\t\tdistance: " << linkDist1;
         }
 
         if (link2 != nullptr && recursive)
         {
-             ss << "\n\tlink: " << link2->toString(false)
+             ss << "\n\tlink 2: " << link2->toString(false)
                 << "\n\t\tdistance: " << linkDist2;
         }
 
@@ -93,6 +93,47 @@ place* GetPlace(int id, place* placeList, int listSize)
 
 void ParsePlaces(string, place*, int&);
 
+void ManageRemoveLink(place* destinations, int numPlaces) // todo: move this to a new class (AirpostManager)
+{
+    place* placeTarget = nullptr;
+    int input;
+    while(true)
+    {
+        cout << "input a place id: "; cin >> input;
+        placeTarget = GetPlace(input, destinations, numPlaces);
+        if (placeTarget != nullptr) break;
+        cout << "bad input\n";
+    }
+
+    cout << placeTarget->toString() << endl;
+
+    if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
+    {
+        cout << "current place has no links! aborting.\n";
+        return;
+    }
+
+    while(true)
+    {
+        cout << "input a link id: "; cin >> input;
+        if (input == 1 && placeTarget->link1 != nullptr)
+        {
+            placeTarget->RemoveLink(1);
+            cout << "removed " << placeTarget->name << "\'s first link.\n";
+            break;
+        }
+        else if (input == 2 && placeTarget->link2 != nullptr)
+        {
+            placeTarget->RemoveLink(2);
+            cout << "removed " << placeTarget->name << "\'s second link.\n";
+            break;
+        }
+        cout << "sorry, try again.\n";
+    }
+}
+
+void ManageAddLink();
+
 int main()
 {
     int numPlaces = 0;
@@ -112,8 +153,6 @@ int main()
     ParsePlaces("destinations.txt", destinations, numPlaces);
 
     bool active = true;
-    int input;
-    place* placeTarget = nullptr;
 
     cout << "Airpost Flight Controller v0.0\n";
 
@@ -122,45 +161,16 @@ int main()
     {
         // 1 = remove, 2 = add, 3 = find route
         // todo: modularize, make it look nice
-        
+
         cout << "input 1-3, or 4 to exit: (menu wip) : ";
-        
+
+        int input;
+
         cin >> input;
         switch(input)
         {
             case 1:
-                while(true)
-                {
-                    cout << "input a place id: "; cin >> input;
-                    placeTarget = GetPlace(input, destinations, numPlaces);
-                    if (placeTarget != nullptr) break;
-                    cout << "bad input\n";
-                }
-
-                cout << placeTarget->toString() << endl;
-                
-                if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
-                {
-                    cout << "current place has no links! aborting.\n";
-                    // need a return here
-                }
-                
-                while(true)
-                {
-                    cout << "input a link id: "; cin >> input;
-                    if (input == 1 && placeTarget->link1 != nullptr)
-                    {
-                        placeTarget->RemoveLink(1);
-                        cout << "removed " << placeTarget->name << "\'s first link.\n";
-                        break;
-                    }
-                    else if (input == 2 && placeTarget->link2 != nullptr)
-                    {
-                        placeTarget->RemoveLink(2);
-                        cout << "removed " << placeTarget->name << "\'s second link.\n";
-                        break;
-                    }
-                }
+                ManageRemoveLink(destinations, numPlaces);
                 break;
 
             case 2:
@@ -168,6 +178,9 @@ int main()
 
             case 3:
                 break;
+            case 4:
+                cout << "seeya\n";
+                return 0;
 
         }
     }
@@ -215,6 +228,6 @@ void ParsePlaces(string filename, place* destinations, int& numPlaces)
 
         cout << destinations[i].toString() << endl;
     }
-    
+
     file.close();
 }
