@@ -203,13 +203,6 @@ class AirpostManager
 
 };
 
-
-
-void ParsePlaces(string, place*, int&);
-
-
-void ManageAddLink();
-
 int main()
 {
     AirpostManager manager;
