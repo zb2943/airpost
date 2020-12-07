@@ -85,6 +85,9 @@ class AirpostManager
     place* destinations;
     int numPlaces = 0;
 
+    place* placeTarget = nullptr;
+    int input = 0;
+
     public:
         void ParsePlaces(string filename)
         {
@@ -158,13 +161,13 @@ class AirpostManager
             }
         }
 
-        void ManageRemoveLink()
+        void UIRemoveLink()
         {
-            place* placeTarget = nullptr;
-            int input;
+            placeTarget = nullptr;
             while(true)
             {
                 cout << "input a place id: "; cin >> input;
+                if (input == -1) return;
                 placeTarget = GetPlace(input, destinations, numPlaces);
                 if (placeTarget != nullptr) break;
                 cout << "bad input\n";
@@ -181,6 +184,7 @@ class AirpostManager
             while(true)
             {
                 cout << "input a link id: "; cin >> input;
+                if (input == -1) return;
                 if (input == 1 && placeTarget->link1 != nullptr)
                 {
                     placeTarget->RemoveLink(1);
@@ -197,9 +201,29 @@ class AirpostManager
             }
         }
 
-        void ManageAddLink() {}
+        void UIAddLink()
+        {
+            placeTarget = nullptr;
+            while(true)
+            {
+                cout << "input a place id: "; cin >> input;
+                if (input == -1) return;
 
-        void ManageTraceRoute() {}
+                placeTarget = GetPlace(input, destinations, numPlaces);
+                if (placeTarget != nullptr) break;
+                cout << "bad input\n";
+            }
+
+            cout << placeTarget->toString() << endl;
+
+
+        }
+
+        void UITraceRoute()
+        {
+            placeTarget = nullptr;
+            return;
+        }
 
 };
 
@@ -226,14 +250,17 @@ int main()
         switch(input)
         {
             case 1:
-                manager.ManageRemoveLink();
+                manager.UIRemoveLink();
                 break;
 
             case 2:
+                manager.UIAddLink();
                 break;
 
             case 3:
+                manager.UITraceRoute();
                 break;
+
             case 4:
                 cout << "seeya\n";
                 return 0;
