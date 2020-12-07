@@ -75,20 +75,40 @@ place* GetPlace(int id, place* placeList, int listSize)
     return nullptr;
 }
 
+void ParsePlaces(string, place*, int&);
+
 int main()
 {
     int numPlaces = 0;
-    ifstream file("destinations.txt");
+    place* destinations;
     
+    ParsePlaces("destinations.txt", destinations, numPlaces);
+    
+    bool active;
+    string input;
+    
+    while(active)
+    {
+        cin >> input;
+        return 0;
+    }
+    
+    return 0;
+}
+
+void ParsePlaces(string filename, place* destinations, int& numPlaces)
+{
+    ifstream file(filename);
     string dummy;
+    
     while(!file.eof())
     {
         numPlaces++;
         for(int i = 0; i < 6; i++)
             getline(file, dummy);
     }
-    
-    place destinations[numPlaces];
+
+    destinations = new place[numPlaces];
     
     file.seekg(0, file.beg);
     for(int i = 0; i < numPlaces; i++)
@@ -124,8 +144,7 @@ int main()
         destinations[i].CalculateDistances();
         
         cout << destinations[i].toString() << endl;
-        
     }
-
-    return 0;
+    
+    file.close();
 }
