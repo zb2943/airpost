@@ -117,8 +117,6 @@ class AirpostManager
 
                 getline(file, dummy);
                 getline(file, dummy);
-
-                cout << destinations[i].toString() << endl;
             }
 
             file.seekg(0, file.beg);
@@ -135,8 +133,6 @@ class AirpostManager
                 destinations[i].link2 = GetPlace(stoi(dummy), destinations, numPlaces);
 
                 destinations[i].CalculateDistances();
-
-                cout << destinations[i].toString() << endl;
             }
 
             file.close();
@@ -144,7 +140,6 @@ class AirpostManager
 
         place* GetPlace(int id, place* placeList, int listSize)
         {
-            cout << id << endl;
             for(int i = 0; i < listSize; i++)
             {
                 if (placeList[i].pcode == id) return &placeList[i];
@@ -166,18 +161,18 @@ class AirpostManager
             placeTarget = nullptr;
             while(true)
             {
-                cout << "input a place id: "; cin >> input;
+                cout << "\ninput a place id: "; cin >> input;
                 if (input == -1) return;
                 placeTarget = GetPlace(input, destinations, numPlaces);
                 if (placeTarget != nullptr) break;
-                cout << "bad input\n";
+                cout << "\tbad input\n";
             }
 
             cout << placeTarget->toString() << endl;
 
             if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
             {
-                cout << "current place has no links! aborting.\n";
+                cout << "\tcurrent place has no links! aborting.\n";
                 return;
             }
 
@@ -197,13 +192,15 @@ class AirpostManager
                     cout << "removed " << placeTarget->name << "\'s second link.\n";
                     break;
                 }
-                cout << "sorry, try again.\n";
+                cout << "\tsorry, try again.\n";
             }
         }
 
         void UIAddLink()
         {
             placeTarget = nullptr;
+            place* addTarget = nullptr;
+
             while(true)
             {
                 cout << "input a place id: "; cin >> input;
@@ -211,11 +208,46 @@ class AirpostManager
 
                 placeTarget = GetPlace(input, destinations, numPlaces);
                 if (placeTarget != nullptr) break;
-                cout << "bad input\n";
+                cout << "\tbad input\n";
             }
 
             cout << placeTarget->toString() << endl;
 
+            if (placeTarget->link1 != nullptr && placeTarget->link2 != nullptr)
+            {
+                cout << "warn: " << placeTarget->name << " already has two links established.\nplease choose one to overwrite: ";
+                while(true)
+                {
+                    cin >> input;
+                    if (input == -1) return;
+                    if (input > 0 && input < 3)
+                    {
+                        placeTarget->RemoveLink(input);
+                        cout << "\tremoved link " << input << endl;
+                        break;
+                    }
+                }
+
+            }
+
+            while(true)
+            {
+                cout << "link created! \n\twhere are you linking this?\n\t(input a place id): "; cin >> input;
+                if (input == -1) return;
+
+                addTarget = GetPlace(input, destinations, numPlaces);
+                if (addTarget->pcode == placeTarget->pcode)
+                {
+                    cout << "\tnice try, but you can't link a place to itself.\n";
+                    addTarget = nullptr;
+                }
+                if (addTarget != nullptr) break;
+                cout << "\tbad input\n";
+            }
+
+            placeTarget->AddLink(addTarget);
+
+            cout << "Linked " << addTarget->name << " to " << placeTarget->name << endl << endl;
 
         }
 
@@ -242,7 +274,7 @@ int main()
         // 1 = remove, 2 = add, 3 = find route
         // todo: modularize, make it look nice
 
-        cout << "input 1-3, or 4 to exit: (menu wip) : ";
+        cout << "input 1-4, or 9 to exit: (menu wip) : ";
 
         int input;
 
@@ -262,8 +294,16 @@ int main()
                 break;
 
             case 4:
+                manager.PrintPlaces();
+                break;
+
+            case 9:
                 cout << "seeya\n";
                 return 0;
+
+            default:
+                cout << "\tinvalid id";
+                break;
 
         }
     }
