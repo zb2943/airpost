@@ -80,82 +80,145 @@ struct place {
     }
 };
 
-place* GetPlace(int id, place* placeList, int listSize)
+class AirpostManager
 {
-    cout << id << endl;
-    for(int i = 0; i < listSize; i++)
-    {
-        if (placeList[i].pcode == id) return &placeList[i];
-    }
+    place* destinations;
+    int numPlaces = 0;
 
-    return nullptr;
-}
+    public:
+        void ParsePlaces(string filename)
+        {
+            fstream file("destinations.txt");
+            string dummy;
+            while(!file.eof())
+            {
+                numPlaces++;
+                for(int i = 0; i < 6; i++)
+                    getline(file, dummy);
+            }
+
+            file.seekg(0, file.beg);
+
+            destinations = new place[numPlaces];
+
+            for(int i = 0; i < numPlaces; i++)
+            {
+                getline(file, dummy);
+                destinations[i].pcode = stoi(dummy);
+                getline(file, dummy);
+                destinations[i].name = dummy;
+                getline(file, dummy);
+                destinations[i].plat = stod(dummy);
+                getline(file, dummy);
+                destinations[i].plng = stod(dummy);
+
+                getline(file, dummy);
+                getline(file, dummy);
+
+                cout << destinations[i].toString() << endl;
+            }
+
+            file.seekg(0, file.beg);
+            for(int i = 0; i < numPlaces; i++)
+            {
+                getline(file, dummy);
+                getline(file, dummy);
+                getline(file, dummy);
+                getline(file, dummy);
+
+                getline(file, dummy);
+                destinations[i].link1 = GetPlace(stoi(dummy), destinations, numPlaces);
+                getline(file, dummy);
+                destinations[i].link2 = GetPlace(stoi(dummy), destinations, numPlaces);
+
+                destinations[i].CalculateDistances();
+
+                cout << destinations[i].toString() << endl;
+            }
+
+            file.close();
+        }
+
+        place* GetPlace(int id, place* placeList, int listSize)
+        {
+            cout << id << endl;
+            for(int i = 0; i < listSize; i++)
+            {
+                if (placeList[i].pcode == id) return &placeList[i];
+            }
+
+            return nullptr;
+        }
+
+        void PrintPlaces()
+        {
+            for(int i = 0; i < numPlaces; i++)
+            {
+                cout << destinations[i].toString() << endl;
+            }
+        }
+
+        void ManageRemoveLink()
+        {
+            place* placeTarget = nullptr;
+            int input;
+            while(true)
+            {
+                cout << "input a place id: "; cin >> input;
+                placeTarget = GetPlace(input, destinations, numPlaces);
+                if (placeTarget != nullptr) break;
+                cout << "bad input\n";
+            }
+
+            cout << placeTarget->toString() << endl;
+
+            if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
+            {
+                cout << "current place has no links! aborting.\n";
+                return;
+            }
+
+            while(true)
+            {
+                cout << "input a link id: "; cin >> input;
+                if (input == 1 && placeTarget->link1 != nullptr)
+                {
+                    placeTarget->RemoveLink(1);
+                    cout << "removed " << placeTarget->name << "\'s first link.\n";
+                    break;
+                }
+                else if (input == 2 && placeTarget->link2 != nullptr)
+                {
+                    placeTarget->RemoveLink(2);
+                    cout << "removed " << placeTarget->name << "\'s second link.\n";
+                    break;
+                }
+                cout << "sorry, try again.\n";
+            }
+        }
+
+        void ManageAddLink() {}
+
+        void ManageTraceRoute() {}
+
+};
+
+
 
 void ParsePlaces(string, place*, int&);
 
-void ManageRemoveLink(place* destinations, int numPlaces) // todo: move this to a new class (AirpostManager)
-{
-    place* placeTarget = nullptr;
-    int input;
-    while(true)
-    {
-        cout << "input a place id: "; cin >> input;
-        placeTarget = GetPlace(input, destinations, numPlaces);
-        if (placeTarget != nullptr) break;
-        cout << "bad input\n";
-    }
-
-    cout << placeTarget->toString() << endl;
-
-    if (placeTarget->link1 == nullptr && placeTarget->link2 == nullptr)
-    {
-        cout << "current place has no links! aborting.\n";
-        return;
-    }
-
-    while(true)
-    {
-        cout << "input a link id: "; cin >> input;
-        if (input == 1 && placeTarget->link1 != nullptr)
-        {
-            placeTarget->RemoveLink(1);
-            cout << "removed " << placeTarget->name << "\'s first link.\n";
-            break;
-        }
-        else if (input == 2 && placeTarget->link2 != nullptr)
-        {
-            placeTarget->RemoveLink(2);
-            cout << "removed " << placeTarget->name << "\'s second link.\n";
-            break;
-        }
-        cout << "sorry, try again.\n";
-    }
-}
 
 void ManageAddLink();
 
 int main()
 {
-    int numPlaces = 0;
+    AirpostManager manager;
 
-    fstream file("destinations.txt");
-    string dummy;
-    while(!file.eof())
-    {
-        numPlaces++;
-        for(int i = 0; i < 6; i++)
-            getline(file, dummy);
-    }
-    file.close();
-
-    place destinations[numPlaces];
-
-    ParsePlaces("destinations.txt", destinations, numPlaces);
+    manager.ParsePlaces("destinations.txt");
 
     bool active = true;
 
     cout << "Airpost Flight Controller v0.0\n";
-
 
     while(active)
     {
@@ -170,7 +233,7 @@ int main()
         switch(input)
         {
             case 1:
-                ManageRemoveLink(destinations, numPlaces);
+                manager.ManageRemoveLink();
                 break;
 
             case 2:
@@ -186,48 +249,4 @@ int main()
     }
 
     return 0;
-}
-
-void ParsePlaces(string filename, place* destinations, int& numPlaces)
-{
-    ifstream file(filename);
-    string dummy;
-
-    file.seekg(0, file.beg);
-    for(int i = 0; i < numPlaces; i++)
-    {
-        getline(file, dummy);
-        destinations[i].pcode = stoi(dummy);
-        getline(file, dummy);
-        destinations[i].name = dummy;
-        getline(file, dummy);
-        destinations[i].plat = stod(dummy);
-        getline(file, dummy);
-        destinations[i].plng = stod(dummy);
-
-        getline(file, dummy);
-        getline(file, dummy);
-
-        cout << destinations[i].toString() << endl;
-    }
-
-    file.seekg(0, file.beg);
-    for(int i = 0; i < numPlaces; i++)
-    {
-        getline(file, dummy);
-        getline(file, dummy);
-        getline(file, dummy);
-        getline(file, dummy);
-
-        getline(file, dummy);
-        destinations[i].link1 = GetPlace(stoi(dummy), destinations, numPlaces);
-        getline(file, dummy);
-        destinations[i].link2 = GetPlace(stoi(dummy), destinations, numPlaces);
-
-        destinations[i].CalculateDistances();
-
-        cout << destinations[i].toString() << endl;
-    }
-
-    file.close();
 }
