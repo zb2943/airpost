@@ -1,10 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 #include "place.h"
 
 using namespace std;
+
+bool contains(vector<place*>& v, place* p)
+{
+    return find(v.begin(), v.end(), p) != v.end();
+}
 
 class AirpostManager
 {
@@ -17,6 +23,10 @@ class AirpostManager
     // for route tracing
     vector<place*> visitedPlaces;
     vector<vector<place*>> paths;
+
+    vector<place*> tmpPath;
+    int pathIndex = 0;
+
     place* lastValidPlace;
     int currentRoute;
     int maxRoutes;
@@ -42,47 +52,50 @@ class AirpostManager
             // src points to the initial place, i.e. NYC in a NYC -> SF route
             // dst points to the destination place, i.e. SF
 
-            // given a place, look at its inputs
-            // see if there's an input that leads to the source,
-            // or if the input leads to somewhere you haven't been before
-            // if so, searchNeighbors that new place (and add it to your visited places)
-            // if you hit a dead end (all places are in visitedPlaces), go back to the last place there were places you could go
-            // (keep track of that in a var)
-            vector<place*> inputs = GetInputs(p);
-            cout << "got inputs\n";
+            // given a source, look at its links
+            // see if there's an link that leads to the destination,
+            // and if so then create a new path with what you've gathered
+            // if not,
+            //     and the link leads to somewhere you haven't been before
+            //     searchNeighbors that new place (and add it to your visited places)
+            // if you hit a dead end (all places are in visitedPlaces), go back a step
 
-            for(size_t i = 0; i < inputs.size(); i++)
+            cout << 1 << endl;
+            visitedPlaces.push_back(p);
+            cout << "pathIndex: " << pathIndex << endl << "tmpPlaces size: " << tmpPath.size() << endl;
+            for(size_t i = 0; i < tmpPath.size(); i++)
             {
-                cout << "endl\n";
-                place* currentPlace = inputs[i];
-
-                for(size_t j = 0; j < visitedPlaces.size(); j++)
+                if (tmpPath[i] == nullptr)
                 {
-                    cout << "endl 2\n";
-                    place* z = visitedPlaces[j];
-                    if (z == currentPlace)
-                    {
-                       // SearchNeighbors(lastValidPlace, src, dst);
-                        return;
-                    }
-                }
+                    cout << "nullptr, ";
+                } else cout << tmpPath[i]->name << ", ";
+            }
+            tmpPath[pathIndex] = p;
+            pathIndex++;
 
-                if (currentPlace == src)
-                {
-                    cout << "found source!\n";
-                    paths.push_back(visitedPlaces);
-                    paths[currentRoute].push_back(currentPlace);
-                    cout << "pushed back all elements.\n";
-                    currentRoute++;
-                    return;
-                }
+            cout << "TESTING STATEMENT: " << (p->name) << endl;
+            if (p == dst)
+            {
+                cout << "found destination! (" << p->name << " == " << dst->name << ")" << endl;
+                paths.push_back(visitedPlaces);
+                currentRoute++;
+            }
+            else
+            {
+                cout << p->name << endl;
+                cout << "visited places size: " << visitedPlaces.size() << endl;
 
-                cout << "moving onward\n\n";
-                lastValidPlace = currentPlace;
-                visitedPlaces.push_back(currentPlace);
-                SearchNeighbors(currentPlace, src, dst);
+                if (p->link1 != nullptr && !contains(visitedPlaces, p->link1))
+                    SearchNeighbors(p->link1, src, dst);
+                if (p->link2 != nullptr && !contains(visitedPlaces, p->link2))
+                    SearchNeighbors(p->link2, src, dst);
+
             }
 
+            cout << 4 << endl;
+
+            visitedPlaces.pop_back();
+            pathIndex--;
         }
 
         void ParsePlaces(string filename)
@@ -138,7 +151,12 @@ class AirpostManager
         {
             for(int i = 0; i < listSize; i++)
             {
-                if (placeList[i].pcode == id) return &placeList[i];
+
+                if (placeList[i].pcode == id)
+                {
+                    cout << id << " COMP " << placeList[i].pcode << endl;
+                    return &placeList[i];
+                }
             }
 
             return nullptr;
@@ -275,6 +293,7 @@ class AirpostManager
 
         void UITraceRoute()
         {
+
             placeTarget = nullptr;
             place* destinationTarget = nullptr;
 
@@ -307,20 +326,17 @@ class AirpostManager
             //vector<vector<place>> prevPaths; // this is for paths you take
             // run this recursive func for only the amt of times you get a complete trip, i.e. you run into the
             // source place
-            vector<place*> inputs = GetInputs(destinationTarget);
-            visitedPlaces.push_back(destinationTarget);
-            maxRoutes = inputs.size();
+
+            paths.clear();
             currentRoute = 0;
-            lastValidPlace = destinationTarget;
-            for(int i = 0; i < inputs.size(); i++)
+            tmpPath.reserve(numPlaces);
+            for(int i =  0; i < numPlaces; i++)
             {
-                // follow the first path you can take, the second and so on
-                cout << "searching neighbors.\n";
-                visitedPlaces.push_back(inputs[i]);
-                SearchNeighbors(inputs[i], placeTarget, destinationTarget);
-                visitedPlaces.clear();
-                lastValidPlace = destinationTarget;
+                tmpPath.push_back(nullptr);
             }
+            pathIndex = 0;
+
+            SearchNeighbors(placeTarget, placeTarget, destinationTarget);
 
             cout << "found routes: \n";
 
