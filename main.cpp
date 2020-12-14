@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <array>
 
 #include "place.h"
 
@@ -316,6 +317,22 @@ class AirpostManager
 
             cout << "found routes: \n";
 
+            // sort by hop count
+            for(size_t i = 0; i < paths.size()-1; i++)
+            {
+                for(size_t j = 0; j < paths.size()-i-1; j++)
+                {
+                    if (paths[j].size() > paths[j+1].size())
+                    {
+                        vector<place*> tmp = paths[j];
+                        paths[j] = paths[j+1];
+                        paths[j+1] = tmp;
+                    }
+                }
+            }
+
+            cout << "sorted by hops: \n";
+
             for(size_t i = 0; i < paths.size(); i++)
             {
                 cout << "\t";
@@ -324,11 +341,58 @@ class AirpostManager
                     cout << paths[i][j]->name;
                     if (j < paths[i].size()-1) cout << " -> ";
                 }
+                cout << "; " << paths[i].size() << " hop";
+                if (paths[i].size() > 1) cout << 's';
                 cout << endl;
             }
 
-            // TODO: get distance and hop count, sort
+            cout << "sorted by distance: \n";
 
+            // add distances together
+            // distances are stored in a separate array and synced with the paths
+            double distances[paths.size()];
+            for(size_t i = 0; i < paths.size(); i++)
+            {
+                for(size_t j = 0; j < paths[i].size()-1; j++)
+                {
+                    if (paths[i][j]->link1 == paths[i][j+1])
+                        distances[i] += paths[i][j]->linkDist1;
+                    else if (paths[i][j]->link2 == paths[i][j+1])
+                        distances[i] += paths[i][j]->linkDist2;
+                }
+            }
+
+            // sort based on distances
+            for(size_t i = 0; i < paths.size()-1; i++)
+            {
+                for(size_t j = 0; j < paths.size()-i-1; j++)
+                {
+                    if (distances[j] > distances[j+1])
+                    {
+                        double tmpDist = distances[j];
+                        distances[j] = distances[j+1];
+                        distances[j+1] = tmpDist;
+
+                        vector<place*> tmp = paths[j];
+                        paths[j] = paths[j+1];
+                        paths[j+1] = tmp;
+                    }
+                }
+            }
+
+
+            for(size_t i = 0; i < paths.size(); i++)
+            {
+                cout << "\t";
+                for(size_t j = 0; j < paths[i].size(); j++)
+                {
+                    cout << paths[i][j]->name;
+                    if (j < paths[i].size()-1) cout << " -> ";
+                }
+                cout << "; " << distances[i] << " m\n";
+            }
+
+            cout << endl << endl;
             return;
         }
 
@@ -346,10 +410,8 @@ int main()
 
     while(active)
     {
-        // 1 = remove, 2 = add, 3 = find route
-        // todo: modularize, make it look nice
 
-        cout << "input 1-4, or 9 to exit: (menu wip) : ";
+        cout << "input 1-4, or 9 to exit: ";
 
         int input;
 
