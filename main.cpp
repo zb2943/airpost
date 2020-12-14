@@ -1,9 +1,49 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "place.h"
 
 using namespace std;
+
+struct PlaceNode
+{
+    PlaceNode* next;
+    place* target;
+    PlaceNode* prev;
+
+    PlaceNode(place* p)
+    {
+        next = nullptr;
+        target = p;
+        prev = nullptr;
+    }
+};
+
+struct PlaceHistory
+{
+    PlaceNode* head;
+    PlaceNode* current;
+    int zsize = 0;
+
+    void AddNode(place* p)
+    {
+        PlaceNode* node = new PlaceNode(p);
+        node->next = nullptr;
+        node->prev = current;
+
+        if (zsize == 0)
+        {
+            head = node;
+            head->prev = nullptr;
+        }
+        current = node;
+        zsize++;
+    }
+};
+
+
+
 
 class AirpostManager
 {
@@ -13,7 +53,77 @@ class AirpostManager
     place* placeTarget = nullptr;
     int input = 0;
 
+    // for route tracing
+    vector<place*> visitedPlaces;
+    vector<vector<place*>> paths;
+    place* lastValidPlace;
+    int currentRoute;
+    int maxRoutes;
+
     public:
+        vector<place*> GetInputs(place* p)
+        {
+            vector<place*> inputs;
+
+            for(int i = 0; i < numPlaces; i++)
+            {
+                if (destinations[i].link1 == p || destinations[i].link2 == p)
+                {
+                    inputs.push_back(&destinations[i]);
+                }
+            }
+
+            return inputs;
+        }
+
+        void SearchNeighbors(place* p, place* src, place* dst)
+        {
+            // src points to the initial place, i.e. NYC in a NYC -> SF route
+            // dst points to the destination place, i.e. SF
+
+            // given a place, look at its inputs
+            // see if there's an input that leads to the source,
+            // or if the input leads to somewhere you haven't been before
+            // if so, searchNeighbors that new place (and add it to your visited places)
+            // if you hit a dead end (all places are in visitedPlaces), go back to the last place there were places you could go
+            // (keep track of that in a var)
+            vector<place*> inputs = GetInputs(p);
+            cout << "got inputs\n";
+
+            for(size_t i = 0; i < inputs.size(); i++)
+            {
+                cout << "endl\n";
+                place* currentPlace = inputs[i];
+
+                for(size_t j = 0; j < visitedPlaces.size(); j++)
+                {
+                    cout << "endl 2\n";
+                    place* z = visitedPlaces[j];
+                    if (z == currentPlace)
+                    {
+                       // SearchNeighbors(lastValidPlace, src, dst);
+                        return;
+                    }
+                }
+
+                if (currentPlace == src)
+                {
+                    cout << "found source!\n";
+                    paths.push_back(visitedPlaces);
+                    paths[currentRoute].push_back(currentPlace);
+                    cout << "pushed back all elements.\n";
+                    currentRoute++;
+                    return;
+                }
+
+                cout << "moving onward\n\n";
+                lastValidPlace = currentPlace;
+                visitedPlaces.push_back(currentPlace);
+                SearchNeighbors(currentPlace, src, dst);
+            }
+
+        }
+
         void ParsePlaces(string filename)
         {
             fstream file("destinations.txt");
@@ -230,6 +340,39 @@ class AirpostManager
             }
 
             cout << destinationTarget->toString() << endl;
+
+            //vector<place> visitedPlaces; //  this is for places you've visited in a single session
+            //place* lastValidPlace; // this is for the last valid place you've visited, with room to explore more
+            //vector<vector<place>> prevPaths; // this is for paths you take
+            // run this recursive func for only the amt of times you get a complete trip, i.e. you run into the
+            // source place
+            vector<place*> inputs = GetInputs(destinationTarget);
+            visitedPlaces.push_back(destinationTarget);
+            maxRoutes = inputs.size();
+            currentRoute = 0;
+            lastValidPlace = destinationTarget;
+            for(int i = 0; i < inputs.size(); i++)
+            {
+                // follow the first path you can take, the second and so on
+                cout << "searching neighbors.\n";
+                visitedPlaces.push_back(inputs[i]);
+                SearchNeighbors(inputs[i], placeTarget, destinationTarget);
+                visitedPlaces.clear();
+                lastValidPlace = destinationTarget;
+            }
+
+            cout << "found routes: \n";
+
+            for(size_t i = 0; i < paths.size(); i++)
+            {
+                cout << "\t";
+                for(size_t j = paths[i].size()-1; j > 0; j--)
+                {
+                    cout << paths[i][j]->name;
+                    if (j > 0) cout << " -> ";
+                }
+                cout << paths[i][0]->name << endl;
+            }
 
             return;
         }
