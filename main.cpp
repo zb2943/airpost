@@ -60,39 +60,22 @@ class AirpostManager
             //     searchNeighbors that new place (and add it to your visited places)
             // if you hit a dead end (all places are in visitedPlaces), go back a step
 
-            cout << 1 << endl;
             visitedPlaces.push_back(p);
-            cout << "pathIndex: " << pathIndex << endl << "tmpPlaces size: " << tmpPath.size() << endl;
-            for(size_t i = 0; i < tmpPath.size(); i++)
-            {
-                if (tmpPath[i] == nullptr)
-                {
-                    cout << "nullptr, ";
-                } else cout << tmpPath[i]->name << ", ";
-            }
             tmpPath[pathIndex] = p;
             pathIndex++;
 
-            cout << "TESTING STATEMENT: " << (p->name) << endl;
             if (p == dst)
             {
-                cout << "found destination! (" << p->name << " == " << dst->name << ")" << endl;
                 paths.push_back(visitedPlaces);
                 currentRoute++;
             }
             else
             {
-                cout << p->name << endl;
-                cout << "visited places size: " << visitedPlaces.size() << endl;
-
                 if (p->link1 != nullptr && !contains(visitedPlaces, p->link1))
                     SearchNeighbors(p->link1, src, dst);
                 if (p->link2 != nullptr && !contains(visitedPlaces, p->link2))
                     SearchNeighbors(p->link2, src, dst);
-
             }
-
-            cout << 4 << endl;
 
             visitedPlaces.pop_back();
             pathIndex--;
@@ -154,7 +137,6 @@ class AirpostManager
 
                 if (placeList[i].pcode == id)
                 {
-                    cout << id << " COMP " << placeList[i].pcode << endl;
                     return &placeList[i];
                 }
             }
@@ -307,7 +289,7 @@ class AirpostManager
                 cout << "\tbad input\n";
             }
 
-            cout << placeTarget->toString() << endl;
+            cout << endl << placeTarget->toString() << endl;
 
             while(true)
             {
@@ -319,17 +301,11 @@ class AirpostManager
                 cout << "\tbad input\n";
             }
 
-            cout << destinationTarget->toString() << endl;
-
-            //vector<place> visitedPlaces; //  this is for places you've visited in a single session
-            //place* lastValidPlace; // this is for the last valid place you've visited, with room to explore more
-            //vector<vector<place>> prevPaths; // this is for paths you take
-            // run this recursive func for only the amt of times you get a complete trip, i.e. you run into the
-            // source place
+            cout << endl << destinationTarget->toString() << endl;
 
             paths.clear();
             currentRoute = 0;
-            tmpPath.reserve(numPlaces);
+            tmpPath.reserve(numPlaces); // might not be necessary
             for(int i =  0; i < numPlaces; i++)
             {
                 tmpPath.push_back(nullptr);
@@ -343,13 +319,15 @@ class AirpostManager
             for(size_t i = 0; i < paths.size(); i++)
             {
                 cout << "\t";
-                for(size_t j = paths[i].size()-1; j > 0; j--)
+                for(size_t j = 0; j < paths[i].size(); j++)
                 {
                     cout << paths[i][j]->name;
-                    if (j > 0) cout << " -> ";
+                    if (j < paths[i].size()-1) cout << " -> ";
                 }
-                cout << paths[i][0]->name << endl;
+                cout << endl;
             }
+
+            // TODO: get distance and hop count, sort
 
             return;
         }
