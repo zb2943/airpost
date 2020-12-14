@@ -331,11 +331,11 @@ class AirpostManager
                 }
             }
 
-            cout << "sorted by hops: \n";
+            cout << "\tsorted by hops: \n";
 
             for(size_t i = 0; i < paths.size(); i++)
             {
-                cout << "\t";
+                cout << "\t\t";
                 for(size_t j = 0; j < paths[i].size(); j++)
                 {
                     cout << paths[i][j]->name;
@@ -346,7 +346,7 @@ class AirpostManager
                 cout << endl;
             }
 
-            cout << "sorted by distance: \n";
+            cout << "\tsorted by distance: \n";
 
             // add distances together
             // distances are stored in a separate array and synced with the paths
@@ -383,7 +383,7 @@ class AirpostManager
 
             for(size_t i = 0; i < paths.size(); i++)
             {
-                cout << "\t";
+                cout << "\t\t";
                 for(size_t j = 0; j < paths[i].size(); j++)
                 {
                     cout << paths[i][j]->name;
@@ -396,6 +396,16 @@ class AirpostManager
             return;
         }
 
+        void PrintHelp()
+        {
+            cout << "The main menu takes in the numbers 1-5 to select an operation.\n"
+                 << "    1: Remove a link from an airport.\n"
+                 << "    2: Add a link to an airport.\n"
+                 << "    3: Trace all possible routes from one airport to another.\n"
+                 << "    4: Print all the airports, their links, and other data.\n"
+                 << "    5: Print this help message.\n\n"
+                 << "   (protip: you can escape from most menus by inputting -1)\n\n\n";
+        }
 };
 
 int main()
@@ -406,12 +416,14 @@ int main()
 
     bool active = true;
 
-    cout << "Airpost Flight Controller v0.0\n";
+    cout << "Airpost Flight Controller v1.0\n"
+         << "You can input \'5\' for a list of commands.\n\n";
+
 
     while(active)
     {
 
-        cout << "input 1-4, or 9 to exit: ";
+        cout << "input 1-5, or 9 to exit: ";
 
         int input;
 
@@ -432,6 +444,10 @@ int main()
 
             case 4:
                 manager.PrintPlaces();
+                break;
+
+            case 5:
+                manager.PrintHelp();
                 break;
 
             case 9:
