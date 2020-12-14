@@ -6,45 +6,6 @@
 
 using namespace std;
 
-struct PlaceNode
-{
-    PlaceNode* next;
-    place* target;
-    PlaceNode* prev;
-
-    PlaceNode(place* p)
-    {
-        next = nullptr;
-        target = p;
-        prev = nullptr;
-    }
-};
-
-struct PlaceHistory
-{
-    PlaceNode* head;
-    PlaceNode* current;
-    int zsize = 0;
-
-    void AddNode(place* p)
-    {
-        PlaceNode* node = new PlaceNode(p);
-        node->next = nullptr;
-        node->prev = current;
-
-        if (zsize == 0)
-        {
-            head = node;
-            head->prev = nullptr;
-        }
-        current = node;
-        zsize++;
-    }
-};
-
-
-
-
 class AirpostManager
 {
     place* destinations;
